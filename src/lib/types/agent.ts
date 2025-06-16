@@ -7,6 +7,7 @@ export interface AgentConfiguration {
   model: string;      // Modèle à utiliser (ex: gpt-4, claude-2, etc.)
   apiKey?: string;    // Clé API optionnelle pour le modèle
   exportFormats: ExportPlatform[];
+  metadata?: Record<string, any>;  // Métadonnées supplémentaires
   createdAt: Date;
   updatedAt: Date;
 }
