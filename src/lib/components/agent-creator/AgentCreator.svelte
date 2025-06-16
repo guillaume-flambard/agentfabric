@@ -15,111 +15,102 @@
   ];
   
   export let templates: AgentTemplate[] = [];
-  $: console.log('templates:', templates);
   export let onSave: (config: AgentConfiguration) => void;
   
   let selectedTemplate: AgentTemplate | null = null;
-  $: console.log('selectedTemplate:', selectedTemplate);
-  let useTemplate = true; // Nouvel état pour basculer entre template et création manuelle
-  $: console.log('useTemplate:', useTemplate);
-  
-  onMount(() => {
-    console.log('AgentCreator mounted with templates:', templates);
-    console.log('useTemplate initial value:', useTemplate);
-  });
-
-  // Déclaration réactive pour suivre les changements d'état
-  $: {
-    console.log('--- State Update ---');
-    console.log('useTemplate:', useTemplate);
-    console.log('selectedTemplate:', selectedTemplate);
-    console.log('templates:', templates);
-    console.log('-------------------');
-  }
-  let agentConfig: Partial<AgentConfiguration> = {
+  let useTemplate = true;
+  let agentConfig: AgentConfiguration = {
     id: crypto.randomUUID(),
     name: '',
     description: '',
     prompt: '',
     model: 'gpt-4',
-    apiKey: '',
-    exportFormats: ['rest', 'nodejs'] as ExportPlatform[]
+    templateId: null,
+    exportFormats: ['rest', 'nodejs'],
+    tags: [],
+    createdAt: new Date(),
+    updatedAt: new Date()
   };
   
   let showExportModal = false;
   let createdAgent: AgentConfiguration | null = null;
   
+  // Réinitialiser le formulaire
+  function resetForm() {
+    agentConfig = {
+      id: crypto.randomUUID(),
+      name: '',
+      description: '',
+      prompt: '',
+      model: 'gpt-4',
+      templateId: null,
+      exportFormats: ['rest', 'nodejs'],
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    selectedTemplate = null;
+  }
+  
+  // Mettre à jour la configuration lorsqu'un modèle est sélectionné
   function selectTemplate(template: AgentTemplate | null) {
-    console.log('selectTemplate called with:', template);
-    
-    // Mettre à jour le template sélectionné
     selectedTemplate = template;
-    
-    // Toujours passer à la vue du formulaire, que ce soit pour un template ou un agent personnalisé
     useTemplate = false;
-    
-    console.log('selectedTemplate after update:', selectedTemplate);
-    console.log('useTemplate after update:', useTemplate);
     
     if (template) {
       // Mettre à jour la configuration avec les données du template
       agentConfig = {
         ...agentConfig,
-        name: template.name,  // Pré-remplir le nom avec celui du template
-        description: template.description,  // Et la description
-        templateId: template.id,
-        exportFormats: [...(template.exportFormats || [])],  // Créer une copie du tableau
-        prompt: template.defaultPrompt,
-        model: template.model || 'gpt-4'  // Utiliser le modèle du template ou une valeur par défaut
+        name: template.name,
+        description: template.description,
+        prompt: template.prompt,
+        model: template.model || 'gpt-4',
+        templateId: template.templateId,
+        exportFormats: [...(template.exportFormats || [])],
+        category: template.category,
+        tags: [...(template.tags || [])],
+        icon: template.icon
       };
     } else {
-      // Réinitialiser les champs pour un agent personnalisé
-      agentConfig = {
-        ...agentConfig,
-        name: '',
-        description: '',
-        templateId: undefined,
-        prompt: '',
-        model: 'gpt-4',
-        exportFormats: ['rest', 'nodejs'] as ExportPlatform[]
-      };
+      // Réinitialiser pour un nouvel agent personnalisé
+      resetForm();
     }
   }
   
+  // Gérer la soumission du formulaire
   function handleSubmit() {
-    if (!agentConfig.name || !agentConfig.prompt || !agentConfig.model) return;
+    if (!agentConfig.name || !agentConfig.prompt) {
+      // Gérer l'erreur de validation
+      return;
+    }
     
-    const config: AgentConfiguration = {
-      id: agentConfig.id!,
-      name: agentConfig.name,
-      description: agentConfig.description || '',
-      templateId: selectedTemplate?.id,
-      prompt: agentConfig.prompt,
+    const configToSave: AgentConfiguration = {
+      ...agentConfig,
+      // S'assurer que les champs requis sont définis
+      name: agentConfig.name.trim(),
+      description: agentConfig.description?.trim() || '',
+      prompt: agentConfig.prompt.trim(),
       model: agentConfig.model,
-      apiKey: agentConfig.apiKey,
-      exportFormats: agentConfig.exportFormats || [],
-      createdAt: new Date(),
+      templateId: agentConfig.templateId,
+      exportFormats: [...agentConfig.exportFormats],
+      tags: agentConfig.tags || [],
+      createdAt: agentConfig.createdAt || new Date(),
       updatedAt: new Date()
     };
     
-    createdAgent = config;
-    onSave(config);
+    onSave(configToSave);
+    createdAgent = configToSave;
+    showExportModal = true;
   }
   
-  function openExportModal() {
-    showExportModal = true;
+  function toggleExportFormat(format: ExportPlatform) {
+    agentConfig.exportFormats = agentConfig.exportFormats.includes(format)
+      ? agentConfig.exportFormats.filter(f => f !== format)
+      : [...agentConfig.exportFormats, format];
   }
   
   function closeExportModal() {
     showExportModal = false;
-  }
-  
-  function toggleExportFormat(format: ExportPlatform) {
-    if (!agentConfig.exportFormats) return;
-    
-    agentConfig.exportFormats = agentConfig.exportFormats.includes(format)
-      ? agentConfig.exportFormats.filter(f => f !== format)
-      : [...agentConfig.exportFormats, format];
   }
 </script>
 
@@ -135,13 +126,10 @@
               type="button"
               class="w-full h-full text-left border rounded-lg p-6 hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
               on:click={() => {
-                console.log('Button clicked for template:', template.id);
                 selectTemplate(template);
               }}
               on:keydown={(e) => {
-                console.log('Key pressed:', e.key);
                 if (e.key === 'Enter') {
-                  console.log('Enter key pressed for template:', template.id);
                   selectTemplate(template);
                 }
               }}
@@ -168,7 +156,6 @@
           type="button"
           class="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           on:click={() => {
-            console.log('Création d\'un agent personnalisé');
             selectTemplate(null);
           }}
         >
@@ -361,7 +348,6 @@
             <button
               type="button"
               on:click={() => {
-                console.log('Retour à la sélection de modèle');
                 useTemplate = true;
               }}
               class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

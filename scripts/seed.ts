@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Charger les variables d'environnement
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.PUBLIC_SUPABASE_ANON_KEY;

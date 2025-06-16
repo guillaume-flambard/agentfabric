@@ -171,16 +171,19 @@
 					</div>
 
 					<!-- Métadonnées supplémentaires -->
-					{#if Object.keys(agent).some((key) => key.startsWith('metadata'))}
-						<div class="sm:col-span-2">
-							<dt class="text-sm font-medium text-gray-500">Métadonnées</dt>
-							<dd class="mt-1">
-								<pre class="overflow-x-auto rounded-md bg-gray-50 p-3 text-xs text-gray-500">
-                  {JSON.stringify(agent.metadata, null, 2)}
+					<div class="sm:col-span-2">
+						<dt class="text-sm font-medium text-gray-500">Métadonnées</dt>
+						<dd class="mt-1">
+							<pre class="overflow-x-auto rounded-md bg-gray-50 p-3 text-xs text-gray-500">
+                  {JSON.stringify({
+                    category: agent.category,
+                    tags: agent.tags,
+                    icon: agent.icon,
+                    model: agent.model
+                  }, null, 2)}
                 </pre>
-							</dd>
-						</div>
-					{/if}
+						</dd>
+					</div>
 				</dl>
 			</div>
 		</div>

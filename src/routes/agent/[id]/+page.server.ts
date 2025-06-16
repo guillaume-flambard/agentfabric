@@ -1,20 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { supabase } from '$lib/supabase';
 import type { ExportPlatform } from '$lib/types/agent';
-
-// In a real app, this would come from a database
-const MOCK_AGENTS: Record<string, any> = {
-  'ad1fcbfb-b6cb-426c-9eb0-06c38c6980b3': {
-    id: 'ad1fcbfb-b6cb-426c-9eb0-06c38c6980b3',
-    name: 'Mon Agent IA',
-    description: 'Un agent IA personnalisé',
-    prompt: 'Tu es un assistant IA utile.',
-    model: 'gpt-4',
-    exportFormats: ['rest', 'nodejs'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-};
 
 // Fonction utilitaire pour valider les formats d'export
 function validateExportFormats(formats: unknown[]): ExportPlatform[] {
@@ -31,31 +18,50 @@ function validateExportFormats(formats: unknown[]): ExportPlatform[] {
 }
 
 export const load: PageServerLoad = async ({ params }) => {
+  const agentId = params.id;
+  
+  if (!agentId) {
+    throw error(400, 'ID d\'agent manquant');
+  }
+  
   try {
-    // In a real app, you would fetch from your database here
-    const agentData = MOCK_AGENTS[params.id];
+    // Récupérer l'agent
+    const { data: agent, error: agentError } = await supabase
+      .from('agents')
+      .select(`
+        *,
+        export_formats:agent_export_formats(format_id)
+      `)
+      .eq('id', agentId)
+      .single();
     
-    if (!agentData) {
-      throw error(404, 'Agent non trouvé');
-    }
+    if (agentError) throw agentError;
+    if (!agent) throw new Error('Agent non trouvé');
     
-    // Validation et conversion des données
-    const agent = {
-      id: agentData.id || params.id,
-      name: agentData.name || 'Sans nom',
-      description: agentData.description || '',
-      templateId: agentData.templateId,
-      prompt: agentData.prompt || '',
-      model: agentData.model || 'gpt-4',
-      exportFormats: validateExportFormats(agentData.exportFormats || []),
-      createdAt: agentData.createdAt ? new Date(agentData.createdAt) : new Date(),
-      updatedAt: agentData.updatedAt ? new Date(agentData.updatedAt) : new Date(),
-      ...(agentData.metadata || {}) // Inclure les métadonnées supplémentaires
+    // Récupérer les formats d'exportation
+    const exportFormats = validateExportFormats(
+      agent.export_formats?.map((f: any) => f.format_id) || []
+    );
+    
+    // Transformer les données pour correspondre au type attendu
+    const agentData = {
+      id: agent.id,
+      name: agent.name,
+      description: agent.description,
+      prompt: agent.prompt,
+      model: agent.model,
+      templateId: agent.template_id,
+      category: agent.metadata?.category,
+      tags: agent.metadata?.tags || [],
+      icon: agent.metadata?.icon,
+      exportFormats,
+      createdAt: new Date(agent.created_at),
+      updatedAt: new Date(agent.updated_at)
     };
     
-    return { agent };
+    return { agent: agentData };
   } catch (err) {
     console.error('Erreur lors du chargement de l\'agent:', err);
-    throw error(404, 'Agent non trouvé');
+    throw error(500, 'Erreur lors du chargement de l\'agent');
   }
 };
