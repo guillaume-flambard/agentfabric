@@ -1,6 +1,5 @@
 <script lang="ts">
   import AgentCreator from '$lib/components/agent-creator/AgentCreator.svelte';
-  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import type { AgentTemplate, AgentConfiguration } from '$lib/types/agent';
 
@@ -13,7 +12,10 @@
       category: 'Rédaction',
       tags: ['réseaux sociaux', 'contenu', 'marketing'],
       defaultPrompt: `Tu es un expert en rédaction pour LinkedIn. Ton rôle est de créer des publications engageantes qui mettent en valeur l'expertise de l'utilisateur. Les publications doivent être professionnelles, inspirantes et inciter à l'engagement. Utilise des appels à l'action clairs et des questions pour stimuler les commentaires.`,
-      icon: '📝'
+      icon: '📝',
+      templateId: 'linkedin-ghostwriter',
+      prompt: '',
+      exportFormats: ['n8n', 'make', 'nodejs', 'rest']
     },
     {
       id: 'pdf-summarizer',
@@ -22,7 +24,10 @@
       category: 'Productivité',
       tags: ['document', 'résumé', 'analyse'],
       defaultPrompt: `Tu es un assistant qui aide à résumer des documents PDF. Ton rôle est d'extraire les informations les plus importantes et de les présenter de manière claire et concise. Inclus les points clés, les données importantes et les conclusions. Si le document contient des sections, organise ton résumé de manière similaire.`,
-      icon: '📄'
+      icon: '📄',
+      templateId: 'pdf-summarizer',
+      prompt: '',
+      exportFormats: ['n8n', 'make', 'nodejs', 'ollama']
     },
     {
       id: 'seo-assistant',
@@ -31,7 +36,10 @@
       category: 'Marketing',
       tags: ['référencement', 'contenu', 'web'],
       defaultPrompt: `Tu es un expert en SEO. Analyse le contenu fourni et propose des améliorations pour optimiser son référencement. Inclus des suggestions de mots-clés, des conseils sur la structure, les balises méta et d'autres optimisations techniques. Explique pourquoi chaque suggestion est importante pour le référencement.`,
-      icon: '🔍'
+      icon: '🔍',
+      templateId: 'seo-assistant',
+      prompt: '',
+      exportFormats: ['n8n', 'make', 'nodejs', 'rest', 'ollama']
     }
   ];
 

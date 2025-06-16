@@ -14,6 +14,7 @@ export interface AgentConfiguration {
   description: string;
   templateId: string;
   prompt: string;
+  exportFormats: ExportPlatform[];
   createdAt: Date;
   updatedAt: Date;
 }

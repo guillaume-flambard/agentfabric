@@ -1,22 +1,28 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { AgentTemplate, AgentConfiguration } from '$lib/types/agent';
+  import AgentExporter from '$lib/components/agent-exporter/AgentExporter.svelte';
   
   export let templates: AgentTemplate[] = [];
   export let onSave: (config: AgentConfiguration) => void;
   
   let selectedTemplate: AgentTemplate | null = null;
   let agentConfig: Partial<AgentConfiguration> = {
+    id: crypto.randomUUID(),
     name: '',
     description: '',
     prompt: ''
   };
+  
+  let showExportModal = false;
+  let createdAgent: AgentConfiguration | null = null;
   
   function selectTemplate(template: AgentTemplate) {
     selectedTemplate = template;
     agentConfig = {
       ...agentConfig,
       templateId: template.id,
+      exportFormats: template.exportFormats || [],
       prompt: template.defaultPrompt
     };
   }
@@ -25,16 +31,26 @@
     if (!selectedTemplate || !agentConfig.name || !agentConfig.prompt) return;
     
     const config: AgentConfiguration = {
-      id: crypto.randomUUID(),
+      id: agentConfig.id!,
       name: agentConfig.name,
       description: agentConfig.description || '',
       templateId: selectedTemplate.id,
       prompt: agentConfig.prompt,
+      exportFormats: selectedTemplate.exportFormats || [],
       createdAt: new Date(),
       updatedAt: new Date()
     };
     
+    createdAgent = config;
     onSave(config);
+  }
+  
+  function openExportModal() {
+    showExportModal = true;
+  }
+  
+  function closeExportModal() {
+    showExportModal = false;
   }
 </script>
 
@@ -114,24 +130,45 @@
         ></textarea>
       </div>
       
-      <div class="flex justify-end space-x-3 pt-4">
-        <button 
-          type="button"
-          class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          on:click={() => selectedTemplate = null}
-        >
-          Annuler
-        </button>
-        <button 
-          type="button"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          on:click={handleSubmit}
-        >
-          Créer l'agent
-        </button>
+      <div class="mt-8 flex justify-between">
+        <div>
+          {#if createdAgent}
+            <button
+              on:click={openExportModal}
+              class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+              Exporter l'agent
+            </button>
+          {/if}
+        </div>
+        <div class="space-x-3">
+          <button
+            type="button"
+            on:click={() => selectedTemplate = null}
+            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Annuler
+          </button>
+          <button
+            on:click={handleSubmit}
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={!selectedTemplate || !agentConfig.name || !agentConfig.prompt}
+          >
+            {createdAgent ? 'Mettre à jour' : 'Créer'} l'agent
+          </button>
+        </div>
       </div>
+      
+      {#if createdAgent && showExportModal}
+        <AgentExporter
+          agent={createdAgent}
+          isOpen={showExportModal}
+          onClose={closeExportModal}
+        />
+      {/if}
     </div>
   {/if}
 </div>
-
-
