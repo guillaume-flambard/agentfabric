@@ -13,6 +13,7 @@ export const load: PageServerLoad = async ({ params }) => {
         description: '',
         templateId: '',
         prompt: '',
+        model: 'gpt-4',
         exportFormats: ['n8n', 'make', 'nodejs', 'rest', 'ollama'] as const satisfies ExportPlatform[],
         createdAt: new Date(),
         updatedAt: new Date()

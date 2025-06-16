@@ -14,7 +14,8 @@
       defaultPrompt: `Tu es un expert en rédaction pour LinkedIn. Ton rôle est de créer des publications engageantes qui mettent en valeur l'expertise de l'utilisateur. Les publications doivent être professionnelles, inspirantes et inciter à l'engagement. Utilise des appels à l'action clairs et des questions pour stimuler les commentaires.`,
       icon: '📝',
       templateId: 'linkedin-ghostwriter',
-      prompt: '',
+      prompt: `Tu es un expert en rédaction pour LinkedIn. Ton rôle est de créer des publications engageantes qui mettent en valeur l'expertise de l'utilisateur. Les publications doivent être professionnelles, inspirantes et inciter à l'engagement. Utilise des appels à l'action clairs et des questions pour stimuler les commentaires.`,
+      model: 'gpt-4',
       exportFormats: ['n8n', 'make', 'nodejs', 'rest']
     },
     {
@@ -26,7 +27,8 @@
       defaultPrompt: `Tu es un assistant qui aide à résumer des documents PDF. Ton rôle est d'extraire les informations les plus importantes et de les présenter de manière claire et concise. Inclus les points clés, les données importantes et les conclusions. Si le document contient des sections, organise ton résumé de manière similaire.`,
       icon: '📄',
       templateId: 'pdf-summarizer',
-      prompt: '',
+      prompt: `Tu es un assistant qui aide à résumer des documents PDF. Ton rôle est d'extraire les informations les plus importantes et de les présenter de manière claire et concise. Inclus les points clés, les données importantes et les conclusions. Si le document contient des sections, organise ton résumé de manière similaire.`,
+      model: 'gpt-4',
       exportFormats: ['n8n', 'make', 'nodejs', 'ollama']
     },
     {
@@ -38,7 +40,8 @@
       defaultPrompt: `Tu es un expert en SEO. Analyse le contenu fourni et propose des améliorations pour optimiser son référencement. Inclus des suggestions de mots-clés, des conseils sur la structure, les balises méta et d'autres optimisations techniques. Explique pourquoi chaque suggestion est importante pour le référencement.`,
       icon: '🔍',
       templateId: 'seo-assistant',
-      prompt: '',
+      prompt: `Tu es un expert en SEO. Analyse le contenu fourni et propose des améliorations pour optimiser son référencement. Inclus des suggestions de mots-clés, des conseils sur la structure, les balises méta et d'autres optimisations techniques. Explique pourquoi chaque suggestion est importante pour le référencement.`,
+      model: 'gpt-4',
       exportFormats: ['n8n', 'make', 'nodejs', 'rest', 'ollama']
     }
   ];

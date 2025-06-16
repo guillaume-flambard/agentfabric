@@ -26,6 +26,7 @@ export const load: PageLoad = async ({ params }) => {
       description: 'Description de test',
       templateId: 'test-template',
       prompt: 'Ceci est un prompt de test',
+      model: 'gpt-4',
       exportFormats: ['n8n', 'make'],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
