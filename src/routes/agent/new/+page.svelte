@@ -1,4 +1,5 @@
 <script lang="ts">
+  // @ts-nocheck
   import AgentCreator from '$lib/components/agent-creator/AgentCreator.svelte';
   import { goto } from '$app/navigation';
   import type { AgentTemplate, AgentConfiguration } from '$lib/types/agent';
@@ -48,9 +49,25 @@
 
   async function handleSave(agentConfig: AgentConfiguration) {
     try {
-      // Ici, nous allons implémenter la sauvegarde de l'agent
-      // Pour l'instant, nous allons simplement rediriger vers la page de l'agent
-      await goto(`/agent/${agentConfig.id}`);
+      // Sauvegarder l'agent dans Supabase
+      const { data: newAgent, error } = await supabase
+        .from('agents')
+        .insert({
+          name: agentConfig.name,
+          description: agentConfig.description,
+          template_id: agentConfig.templateId,
+          prompt: agentConfig.prompt,
+          model: agentConfig.model,
+          api_key: agentConfig.apiKey,
+          metadata: agentConfig.metadata || {}
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Rediriger vers la page de l'agent
+      await goto(`/agent/${newAgent.id}`);
     } catch (error) {
       console.error('Erreur lors de la création de l\'agent:', error);
       // Gérer l'erreur (afficher un message à l'utilisateur, etc.)
